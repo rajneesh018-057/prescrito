@@ -39,6 +39,8 @@ import doc13 from './doc13.png'
 import doc14 from './doc14.png'
 import doc15 from './doc15.png'
 import about_image from './about_image.png'
+import contact_image from './contact_image.png'
+
 
   
 
@@ -84,7 +86,9 @@ export const assets = {
     doc13,
     doc14,
     doc15,
-    about_image
+    about_image,
+    contact_image
+    
     
   
 }
