@@ -1,22 +1,61 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useNavigate } from 'react-router';
 
 const AuthForm = () => {
+  const { backendUrl, token,setToken } = useContext(AppContext);
+  const navigate = useNavigate();
+
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      name: isLogin ? undefined : name,
-      email,
-      password,
-      mode: isLogin ? 'login' : 'signup',
-    });
-    // Add authentication logic here
+
+    try {
+      if (!isLogin) {
+        // Signup logic
+        const response = await axios.post(`${backendUrl}/api/user/register`, {
+          name,
+          email,
+          password,
+        });
+
+        if (response.data.success) {
+          localStorage.setItem('token', response.data.user.token);
+          setToken(response.data.user.token);
+          toast.success('Registration successful! You can now log in.');
+          setIsLogin(true); // Switch to login mode
+        } else {
+          toast.error(response.data.message || 'Registration failed.');
+        }
+      } else {
+        // Login logic
+        const response = await axios.post(`${backendUrl}/api/user/login`, {
+          email,
+          password,
+        });
+
+        if (response.data.success) {
+          localStorage.setItem('token', response.data.user.token);
+          setToken(response.data.user.token);
+          toast.success('Login successful!');
+          navigate('/'); // Redirect to home after login
+        } else {
+          toast.error(response.data.message || 'Login failed.');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || 'An error occurred.');
+    }
   };
+ 
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -26,7 +65,6 @@ const AuthForm = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Full Name (Signup only) */}
           {!isLogin && (
             <div>
               <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -41,7 +79,6 @@ const AuthForm = () => {
             </div>
           )}
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -54,7 +91,6 @@ const AuthForm = () => {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
             <div className="relative">
@@ -84,7 +120,6 @@ const AuthForm = () => {
           </button>
         </form>
 
-        {/* Toggle Prompt */}
         <p className="text-center text-sm text-gray-600 mt-6">
           {isLogin ? (
             <>

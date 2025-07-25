@@ -9,10 +9,15 @@ import MyProfile from './pages/myprofile';
 import Appointment from './pages/appointments';
 import Navbar from './components/Navbar';
 import DoctorDetails from './pages/DoctorDetails';
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   return (
     <div className='mx-4 sm:mx-[10%]'>
+      <ToastContainer position="top-right" autoClose={5000} />
+      
+      {/* Navbar component */}
       <Navbar />
 
       <Routes>

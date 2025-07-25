@@ -20,41 +20,39 @@ const userSchema = new mongoose.Schema({
 
   phone: {
     type: String,
-    required: true,
+    default: '',
   },
 
   gender: {
     type: String,
     enum: ['Male', 'Female', 'Other'],
-    required: true,
+    default: 'Other',
   },
 
   dob: {
     type: Date,
-    required: true,
+    default: null,
   },
 
   address: {
     type: String,
-    required: true,
+    default: '',
   },
 
   profilePic: {
     type: String,
     default: 'https://res.cloudinary.com/demo/image/upload/v1680000000/default-profile.png',
-    required: true,
   },
-
 }, {
   timestamps: true,
 });
 
-// ✅ Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+// // ✅ Hash password before saving
+// userSchema.pre('save', async function (next) {
+//   if (!this.isModified('password')) return next();
+//   this.password = await bcrypt.hash(this.password, 10);
+//   next();
+// });
 
 const User = mongoose.model('User', userSchema);
 export default User;

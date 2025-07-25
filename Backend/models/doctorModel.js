@@ -49,6 +49,10 @@ const doctorSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  about: {
+    type: String,
+    default: '',
+  },
   dateSlotsBooked: {
     type: Object,
     default: {},
