@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
-import { assets } from '../assets/assets';
+import React, { useState, useEffect, useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 
 const MyProfile = () => {
-  const [userData, setUserData] = useState({
-    name: 'Rajneesh Kumar',
-    email: 'rajneesh@example.com',
-    phone: '+91 9876543210',
-    address: 'Shastrinagar, Chhibramau, Kannauj',
-    dob: '15 March 2002',
-    joined: 'July 2024',
-    photo: assets.profile_pic,
-  });
+  const { userData, setUserData } = useContext(AppContext);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...userData });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    dob: '',
+    joined: '',
+    photo: ''
+  });
 
-  // 📷 Handle Image Upload
+  useEffect(() => {
+    if (userData) {
+      setFormData(prev => ({
+        ...prev,
+        ...userData
+      }));
+    }
+  }, [userData]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file); // temporary URL
+      const imageUrl = URL.createObjectURL(file);
       setFormData((prev) => ({ ...prev, photo: imageUrl }));
     }
   };
@@ -33,94 +41,106 @@ const MyProfile = () => {
     setIsEditing(false);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center p-6">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 sm:p-10 text-center">
-        {/* Profile Image */}
-        <div className="relative inline-block mb-6">
-          <img
-            src={formData.photo}
-            alt="Profile"
-            className="w-36 h-36 rounded-full border-4 border-blue-500 object-cover mx-auto shadow-lg"
-          />
+  if (!userData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading profile...</p>
+      </div>
+    );
+  }
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 sm:p-8">
+        
+        {/* Profile Image */}
+        <div className="flex flex-col items-center mb-6">
+          <img
+            src={formData.photo || '/default-avatar.png'}
+            alt="Profile"
+            className="w-28 h-28 rounded-full border-4 border-blue-500 object-cover shadow-md"
+          />
           {isEditing && (
-            <div className="mt-4">
+            <div className="mt-3">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                className="block text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
             </div>
           )}
         </div>
 
         {/* Name & Email */}
-        {isEditing ? (
-          <>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full mb-2 px-4 py-3 text-lg font-medium border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full mb-4 px-4 py-3 text-lg font-medium border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-            />
-          </>
-        ) : (
-          <>
-            <h2 className="text-3xl font-bold text-gray-800 mb-1">{userData.name}</h2>
-            <p className="text-gray-500 mb-6">{userData.email}</p>
-          </>
-        )}
+        <div className="text-center mb-6">
+          {isEditing ? (
+            <>
+              <input
+                type="text"
+                name="name"
+                value={formData.name || ''}
+                onChange={handleChange}
+                className="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Full Name"
+              />
+              <input
+                type="email"
+                name="email"
+                value={formData.email || ''}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Email Address"
+              />
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-gray-800">{formData.name}</h2>
+              <p className="text-gray-500">{formData.email}</p>
+            </>
+          )}
+        </div>
 
-        {/* Profile Fields */}
-        <div className="text-left space-y-4 text-gray-700">
+        {/* Profile Details */}
+        <div className="space-y-4">
           {[
             ['Phone', 'phone'],
             ['Address', 'address'],
             ['Date of Birth', 'dob'],
-            ['Member Since', 'joined'],
-          ].map(([label, key]) =>
-            isEditing && key !== 'joined' ? (
-              <div key={key}>
-                <label className="font-semibold block mb-1">{label}</label>
+            ['Member Since', 'joined']
+          ].map(([label, key]) => (
+            <div key={key} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span className="font-semibold text-gray-700">{label}</span>
+              {isEditing && key !== 'joined' ? (
                 <input
                   name={key}
-                  value={formData[key]}
+                  value={formData[key] || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400"
+                  className="w-full sm:w-2/3 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
+                  placeholder={label}
                 />
-              </div>
-            ) : (
-              <div key={key}>
-                <span className="font-semibold">{label}:</span>{' '}
-                {userData[key]}
-              </div>
-            )
-          )}
+              ) : (
+                <span className="text-gray-600 break-words sm:text-right w-full sm:w-2/3">
+                  {formData[key]}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
 
-        {/* Buttons */}
-        <div className="mt-8 flex justify-center gap-4">
+        {/* Action Buttons */}
+        <div className="mt-6 flex justify-center gap-4">
           {isEditing ? (
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition"
+              className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition"
             >
               Save Changes
             </button>
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition"
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
             >
               Edit Profile
             </button>

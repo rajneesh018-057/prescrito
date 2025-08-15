@@ -7,7 +7,7 @@ import { assets } from '../assets/assets'; // ✅ Make sure assets contains logo
 
 const Navbar = () => {
   const navigate = useNavigate();
-const {backendUrl, token, setToken}= useContext(AppContext); // ✅ Ensure AppContext value is [backendUrl, token, setToken]
+const {backendUrl, token, setToken,userData}= useContext(AppContext); // ✅ Ensure AppContext value is [backendUrl, token, setToken]
   const [showMenu, setShowMenu] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -81,7 +81,7 @@ const {backendUrl, token, setToken}= useContext(AppContext); // ✅ Ensure AppCo
                 onClick={() => setShowDropdown((prev) => !prev)}
               >
                 <img
-                  src={assets.profile_pic}
+                  src={userData?.profilePic || assets.profile_pic}
                   alt="Profile"
                   className="w-10 h-10 rounded-full border"
                 />

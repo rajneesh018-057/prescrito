@@ -2,6 +2,7 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import { v2 as cloudinary } from 'cloudinary';
 
 const registerUser = async (req, res) => {
   try {
@@ -98,17 +99,72 @@ const loginUser = async (req, res) => {
 // api to get user profile data 
 const getUserProfile = async (req, res) => {
   try {       
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {  
+const 
+userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+    const user = await User.findById(userId).select('-password');
+    res.json({success:true,user}) // Exclude password from response
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
-    } 
-    res.status(200).json({
-      success: true,
-      user,
-    });
+    }
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };  
-export { registerUser, loginUser };
+ const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+    const { name, address, dob, phone, gender } = req.body;
+
+    const profilePicUrl = req.file ? req.file.path : null; // From multer
+
+    // Input validation
+    if (!name || !gender || !address || !dob || !phone ) {
+      return res.status(400).json({ success: false, message: 'Please fill all fields' });
+    }
+
+    let imageurl;
+
+    if (profilePicUrl) {
+      const image = await cloudinary.uploader.upload(profilePicUrl, {
+        folder: 'profile_pics',
+        width: 150,
+        crop: 'scale',
+      });
+      imageurl = image.secure_url;
+    }
+
+    // Build update object
+    const updateData = {
+      name,
+      address,
+    dob,
+      phone,
+      gender,
+      
+    };
+
+    if (imageurl) {
+      updateData.profilePic = imageurl;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'User profile updated successfully',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+
+
+export { registerUser, loginUser , getUserProfile, updateUserProfile  };
